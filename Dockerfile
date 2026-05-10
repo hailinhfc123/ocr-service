@@ -1,20 +1,19 @@
-# Use official Paddle GPU base
-FROM paddlepaddle/paddle:3.3.1-gpu-cuda12.6-cudnn9.5
+# STAGE 1: Download models on a lightweight CPU image
+FROM python:3.10-slim as downloader
+RUN pip install paddleocr paddlepaddle
+# This downloads models to /root/.paddleocr
+RUN python3 -c "from paddleocr import PaddleOCR; PaddleOCR(lang='en', device='cpu')"
 
-# 1. Fix the libGL and glib errors we saw on Vast.ai
+# STAGE 2: Final GPU Image
+FROM paddlepaddle/paddle:3.3.1-gpu-cuda12.6-cudnn9.5
 RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
 
-# 2. Set up workspace
+# Copy the models from the first stage
+COPY --from=downloader /root/.paddleocr /root/.paddleocr
+
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
-# 3. PRE-DOWNLOAD MODELS (Crucial to avoid cold-start delays)
-# This runs once during build and saves the models into the image
-RUN python3 -c "from paddleocr import PaddleOCR; PaddleOCR(lang='en', device='cpu')"
-
-# 4. Copy app code
 COPY app.py .
 
-# 5. Start command
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
