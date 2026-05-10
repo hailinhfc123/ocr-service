@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 3. PRE-DOWNLOAD MODELS (Crucial to avoid cold-start delays)
 # This runs once during build and saves the models into the image
-RUN python3 -c "from paddleocr import PaddleOCR; PaddleOCR(lang='en', device='gpu')"
+RUN python3 -c "from paddleocr import PaddleOCR; PaddleOCR(lang='en', device='cpu')"
 
 # 4. Copy app code
 COPY app.py .
