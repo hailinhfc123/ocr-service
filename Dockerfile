@@ -1,5 +1,5 @@
 # Use official Paddle GPU base
-FROM paddlepaddle/paddle:3.0.0-gpu-cuda12.6-cudnn9.5
+FROM paddlepaddle/paddle:3.3.1-gpu-cuda12.6-cudnn9.5
 
 # 1. Fix the libGL and glib errors we saw on Vast.ai
 RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
